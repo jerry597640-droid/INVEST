@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>家庭財務資產戰情指揮中心 | Ultra-Light 記憶版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #334155;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .subtle-grid {
+      background-size: 24px 24px;
+      background-image: radial-gradient(#e2e8f0 1.2px, transparent 1.2px);
+    }
+    .card-soft {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+  </style>
+</head>
+<body class="subtle-grid min-h-screen p-4 sm:p-6 lg:p-8">
+
+  <div class="max-w-[1680px] mx-auto space-y-6">
+    
+    <!-- 頂部導航指揮列 -->
+    <header class="card-soft rounded-2xl p-5 sm:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-2xl shadow-xs">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-800">
+              家庭財務資產戰情指揮中心
+            </h1>
+            <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 font-mono flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>自動記憶已啟用
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            資產持有人：許學殿 & 廖靜君 ｜ 全參數本地持久化儲存
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側控制組：重置預設按鈕 + 模式切換 -->
+      <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+        <button onclick="resetDefaults()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all" title="恢復出廠預設值">
+          <i class="fa-solid fa-rotate-left mr-1"></i>重置數值
+        </button>
+        <div class="flex items-center bg-slate-100 p-1.5 rounded-xl border border-slate-200 flex-1 lg:flex-none">
+          <button id="btnActive" onclick="setMode('active')" class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-emerald-500 text-white shadow-xs">
+            <i class="fa-solid fa-briefcase"></i> 雙薪在職
+          </button>
+          <button id="btnRetired" onclick="setMode('retired')" class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-500 hover:text-slate-800">
+            <i class="fa-solid fa-umbrella-beach"></i> 退休防禦 (技師啟動)
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 頂部核心 HUD KPI 卡片 (清新粉彩色條) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- 卡片 1 -->
+      <div class="card-soft rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider flex justify-between items-center">
+          <span>全家資產純淨值</span>
+          <i class="fa-solid fa-vault text-slate-300 text-sm"></i>
+        </div>
+        <div id="kpiNetWorth" class="text-2xl sm:text-3xl font-bold font-mono text-emerald-600 mt-2">$3,500.1 萬</div>
+        <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between pt-1 border-t border-slate-50">
+          <span>房產淨值: $3,747.4萬</span>
+          <span>融資負債: 1,019.7萬</span>
+        </div>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-400"></div>
+      </div>
+
+      <!-- 卡片 2 -->
+      <div class="card-soft rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider flex justify-between items-center">
+          <span>每月總資金流入</span>
+          <i class="fa-solid fa-arrow-trend-up text-blue-400 text-sm"></i>
+        </div>
+        <div id="kpiTotalIncome" class="text-2xl sm:text-3xl font-bold font-mono text-blue-600 mt-2">$0</div>
+        <div id="kpiIncomeDesc" class="text-[11px] text-slate-400 mt-1.5 pt-1 border-t border-slate-50 truncate">
+          雙薪 + 房租 + 美股配息
+        </div>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-blue-400"></div>
+      </div>
+
+      <!-- 卡片 3 -->
+      <div class="card-soft rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider flex justify-between items-center">
+          <span>每月剛性流出總額</span>
+          <i class="fa-solid fa-arrow-trend-down text-rose-400 text-sm"></i>
+        </div>
+        <div id="kpiTotalExpense" class="text-2xl sm:text-3xl font-bold font-mono text-rose-500 mt-2">-$0</div>
+        <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between pt-1 border-t border-slate-50">
+          <span>房貸利息: $9.89萬</span>
+          <span>生活教育儲備: $17.75萬</span>
+        </div>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-rose-400"></div>
+      </div>
+
+      <!-- 卡片 4 -->
+      <div class="card-soft rounded-2xl p-5 relative overflow-hidden">
+        <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider flex justify-between items-center">
+          <span>每月純口袋淨盈餘</span>
+          <i class="fa-solid fa-wallet text-amber-400 text-sm"></i>
+        </div>
+        <div id="kpiNetSurplus" class="text-2xl sm:text-3xl font-bold font-mono text-amber-500 mt-2">+$0</div>
+        <div id="kpiSurplusSub" class="text-[11px] text-slate-400 mt-1.5 pt-1 border-t border-slate-50 truncate">
+          全額扣除後純落袋儲備
+        </div>
+        <div class="absolute top-0 left-0 right-0 h-1 bg-amber-400"></div>
+      </div>
+
+    </div>
+
+    <!-- CRCO 與 AMDY 雙向獨立敏感度調控面板 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      
+      <!-- 1. CRCO 調控面板 -->
+      <section class="card-soft rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 text-sm">
+              <i class="fa-solid fa-gem"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-slate-800 tracking-wide">CRCO 股數與週配息調控</h2>
+              <p class="text-[11px] text-slate-400">預扣 30% 美國海外所得稅 ｜ 匯率 32 ｜ 關閉 DRIP</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-400">股數</span>
+              <input 
+                type="number" 
+                id="crcoShares" 
+                value="9533" 
+                class="w-20 bg-white border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold font-mono text-indigo-600 text-right focus:outline-none focus:border-indigo-400"
+                oninput="updateAll()"
+              />
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-400 font-mono">$</span>
+              <input 
+                type="number" 
+                id="crcoInput" 
+                min="0.00" 
+                max="1.20" 
+                step="0.0005" 
+                value="0.3165" 
+                class="w-20 bg-white border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold font-mono text-indigo-600 text-right focus:outline-none focus:border-indigo-400"
+                oninput="handleCrcoInput(this.value)"
+              />
+              <span class="text-[11px] text-slate-400 font-mono">/週</span>
+            </div>
+          </div>
+        </div>
+
+        <input 
+          type="range" 
+          id="crcoSlider" 
+          min="0.00" 
+          max="1.20" 
+          step="0.0005" 
+          value="0.3165" 
+          class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+          oninput="handleCrcoSlider(this.value)" 
+        />
+        
+        <div class="grid grid-cols-5 text-[10px] text-slate-400 font-mono text-center">
+          <span class="text-left cursor-pointer hover:text-indigo-500" onclick="setCrcoQuick(0.00)">$0.00</span>
+          <span class="cursor-pointer hover:text-indigo-500" onclick="setCrcoQuick(0.20)">平滑 $0.20</span>
+          <span class="text-indigo-600 font-semibold cursor-pointer hover:underline" onclick="setCrcoQuick(0.30)">常態 $0.30</span>
+          <span class="cursor-pointer hover:text-indigo-500" onclick="setCrcoQuick(0.60)">高波 $0.60</span>
+          <span class="text-right cursor-pointer hover:text-indigo-500" onclick="setCrcoQuick(1.20)">極限 $1.20</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2.5 border-t border-slate-100 text-xs">
+          <div class="bg-indigo-50/40 p-2.5 rounded-xl border border-indigo-100/60 flex justify-between items-center">
+            <span class="text-indigo-900 font-medium flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar-check text-indigo-500"></i> 預估本週流入配息：
+            </span>
+            <span id="valCrcoWeekly" class="text-indigo-600 font-mono font-bold text-sm">+$67,585 元</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 flex justify-between items-center">
+            <span class="text-slate-500">CRCO 稅後預估月流入：</span>
+            <span id="valCrcoMonthly" class="text-emerald-600 font-mono font-bold text-sm">+$270,341 元</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. AMDY 調控面板 -->
+      <section class="card-soft rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 text-sm">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-slate-800 tracking-wide">AMDY 股數與週配息調控</h2>
+              <p class="text-[11px] text-slate-400">預扣 30% 美國海外所得稅 ｜ 匯率 32 ｜ 關閉 DRIP</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-400">股數</span>
+              <input 
+                type="number" 
+                id="amdyShares" 
+                value="61" 
+                class="w-16 bg-white border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold font-mono text-amber-600 text-right focus:outline-none focus:border-amber-400"
+                oninput="updateAll()"
+              />
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+              <span class="text-xs text-slate-400 font-mono">$</span>
+              <input 
+                type="number" 
+                id="amdyInput" 
+                min="0.00" 
+                max="2.50" 
+                step="0.01" 
+                value="0.36" 
+                class="w-16 bg-white border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold font-mono text-amber-600 text-right focus:outline-none focus:border-amber-400"
+                oninput="handleAmdyInput(this.value)"
+              />
+              <span class="text-[11px] text-slate-400 font-mono">/週</span>
+            </div>
+          </div>
+        </div>
+
+        <input 
+          type="range" 
+          id="amdySlider" 
+          min="0.00" 
+          max="2.50" 
+          step="0.01" 
+          value="0.36" 
+          class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-amber-500" 
+          oninput="handleAmdySlider(this.value)" 
+        />
+        
+        <div class="grid grid-cols-5 text-[10px] text-slate-400 font-mono text-center">
+          <span class="text-left cursor-pointer hover:text-amber-500" onclick="setAmdyQuick(0.00)">$0.00</span>
+          <span class="cursor-pointer hover:text-amber-500" onclick="setAmdyQuick(0.46)">低標 $0.46</span>
+          <span class="text-amber-600 font-semibold cursor-pointer hover:underline" onclick="setAmdyQuick(0.69)">常態 $0.69</span>
+          <span class="cursor-pointer hover:text-amber-500" onclick="setAmdyQuick(1.20)">中高 $1.20</span>
+          <span class="text-right cursor-pointer hover:text-amber-500" onclick="setAmdyQuick(2.50)">極限 $2.50</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2.5 border-t border-slate-100 text-xs">
+          <div class="bg-amber-50/40 p-2.5 rounded-xl border border-amber-100/60 flex justify-between items-center">
+            <span class="text-amber-900 font-medium flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar-check text-amber-500"></i> 預估本週流入配息：
+            </span>
+            <span id="valAmdyWeekly" class="text-amber-600 font-mono font-bold text-sm">+$492 元</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 flex justify-between items-center">
+            <span class="text-slate-500">AMDY 稅後預估月流入：</span>
+            <span id="valAmdyMonthly" class="text-emerald-600 font-mono font-bold text-sm">+$1,968 元</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 視覺圖表核心區塊 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      
+      <!-- 圖表 1：收入來源環狀圖 -->
+      <div class="card-soft rounded-2xl p-5 flex flex-col justify-between">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-blue-500"></i> 每月資金流入結構
+          </h3>
+          <span class="text-[10px] text-slate-400 font-mono">DOUGHNUT</span>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center py-2">
+          <div class="sm:col-span-6 relative h-48 w-full flex items-center justify-center">
+            <canvas id="chartIncome"></canvas>
+          </div>
+          <div id="listIncomeDetails" class="sm:col-span-6 space-y-1.5 text-xs font-mono">
+            <!-- 動態注入 -->
+          </div>
+        </div>
+
+        <div class="text-[11px] text-center text-slate-400 mt-2">
+          即時監控薪資、房租、CRCO、AMDY 與證照金流占比
+        </div>
+      </div>
+
+      <!-- 圖表 2：支出結構圓餅圖 -->
+      <div class="card-soft rounded-2xl p-5 flex flex-col justify-between">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-pie-chart text-rose-500"></i> 每月剛性支出分佈
+          </h3>
+          <span class="text-[10px] text-slate-400 font-mono">PIE</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center py-2">
+          <div class="sm:col-span-6 relative h-48 w-full flex items-center justify-center">
+            <canvas id="chartExpense"></canvas>
+          </div>
+          <div id="listExpenseDetails" class="sm:col-span-6 space-y-1.5 text-xs font-mono">
+            <!-- 動態注入 -->
+          </div>
+        </div>
+
+        <div class="text-[11px] text-center text-slate-400 mt-2">
+          涵蓋房貸本息、教育、修繕與健康儲備
+        </div>
+      </div>
+
+      <!-- 圖表 3：收支對比長條圖 -->
+      <div class="card-soft rounded-2xl p-5 flex flex-col justify-between">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-chart-column text-amber-500"></i> 收支淨存動態比對
+          </h3>
+          <span class="text-[10px] text-slate-400 font-mono">BAR CHART</span>
+        </div>
+        <div class="relative h-60 w-full flex items-center justify-center">
+          <canvas id="chartBalance"></canvas>
+        </div>
+        <div class="text-[11px] text-center text-slate-400 mt-2">
+          即時檢視流入 vs 流出 vs 純口袋盈餘
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 參數自訂工作區 (淺色編輯面板) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      
+      <!-- 收入端調節 -->
+      <section class="card-soft rounded-2xl p-5 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-blue-500"></i> 收入自訂編輯 (自動即時存檔)
+          </h3>
+          <span class="text-[10px] text-slate-400 font-mono">TWD / MONTH</span>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div id="blockSalary" class="p-3 bg-slate-50/70 rounded-xl border border-slate-200/60 grid grid-cols-2 gap-3 transition-all">
+            <div>
+              <span class="text-slate-500 block mb-1">許學殿 本薪 (在職)</span>
+              <input type="number" id="inSalaryHsu" value="72816" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+            </div>
+            <div>
+              <span class="text-slate-500 block mb-1">廖靜君 本薪 (在職)</span>
+              <input type="number" id="inSalaryLiao" value="75774" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+            </div>
+          </div>
+
+          <div id="blockLicense" class="p-3 bg-slate-50/70 rounded-xl border border-slate-200/60 flex justify-between items-center opacity-40 pointer-events-none transition-all">
+            <span class="text-indigo-950 font-medium">📜 技師證照收益 (退休啟動)</span>
+            <input type="number" id="inLicense" value="40000" class="w-32 bg-white border border-indigo-200 rounded-lg p-2 font-mono text-right text-indigo-600 font-bold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+
+          <div class="p-3 bg-slate-50/70 rounded-xl border border-slate-200/60 flex justify-between items-center">
+            <span class="text-slate-600 font-medium">🏢 房地產總租金 (6筆房產)</span>
+            <input type="number" id="inRent" value="110143" class="w-32 bg-white border border-slate-200 rounded-lg p-2 font-mono text-right text-slate-700 font-bold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+
+          <div class="p-3 bg-slate-50/70 rounded-xl border border-slate-200/60 flex justify-between items-center font-mono">
+            <span class="text-slate-500">🏰 美股配息總產出 (CRCO + AMDY 稅後)</span>
+            <span id="valTotalDiv" class="text-emerald-600 font-bold text-sm">+$272,309</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 支出端調節 -->
+      <section class="card-soft rounded-2xl p-5 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-rose-500"></i> 支出自訂編輯 (自動即時存檔)
+          </h3>
+          <span class="text-[10px] text-slate-400 font-mono">TWD / MONTH</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">👧 小孩教育費用</span>
+            <input type="number" id="inEdu" value="75000" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">🍱 生活+修繕準備</span>
+            <input type="number" id="inLivingRepair" value="75000" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">🏥 醫療健康儲備</span>
+            <input type="number" id="inMed" value="20000" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">✈️ 旅遊基金+訂閱</span>
+            <input type="number" id="inTravelSub" value="7500" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">🏠 房貸本息 (既有+新增)</span>
+            <input type="number" id="inMortgage" value="79099" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+          <div class="p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/60">
+            <span class="text-slate-500 block mb-1">📈 理財貸息+管費</span>
+            <input type="number" id="inLoanMgmt" value="31225" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-mono text-right text-slate-700 font-semibold focus:outline-none focus:border-indigo-400" oninput="updateAll()" />
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'family_warroom_data_v1';
+    let currentMode = 'active';
+    const USD_TWD = 32;
+    const TAX_RATE = 0.7;
+    const REAL_ESTATE_NET = 37473500;
+    const TOTAL_DEBT = 10197000;
+
+    // 所有需要記憶的欄位 ID 清單
+    const INPUT_FIELDS = [
+      'crcoShares', 'crcoInput',
+      'amdyShares', 'amdyInput',
+      'inSalaryHsu', 'inSalaryLiao',
+      'inLicense', 'inRent',
+      'inEdu', 'inLivingRepair', 'inMed', 'inTravelSub',
+      'inMortgage', 'inLoanMgmt'
+    ];
+
+    // 圖表實例
+    let chartIncomeInstance = null;
+    let chartExpenseInstance = null;
+    let chartBalanceInstance = null;
+
+    // 儲存狀態至 localStorage
+    function saveState() {
+      const state = {
+        mode: currentMode
+      };
+      INPUT_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) state[id] = el.value;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // 從 localStorage 讀取並還原
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return false;
+      try {
+        const state = JSON.parse(saved);
+        if (state.mode) currentMode = state.mode;
+        INPUT_FIELDS.forEach(id => {
+          if (state[id] !== undefined) {
+            const el = document.getElementById(id);
+            if (el) el.value = state[id];
+          }
+        });
+        // 同步 slider
+        if (state.crcoInput) document.getElementById('crcoSlider').value = state.crcoInput;
+        if (state.amdyInput) document.getElementById('amdySlider').value = state.amdyInput;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // 重置預設數值
+    function resetDefaults() {
+      if (confirm('確定要將所有數值恢復為初始設定嗎？')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      const btnActive = document.getElementById('btnActive');
+      const btnRetired = document.getElementById('btnRetired');
+      const blockSalary = document.getElementById('blockSalary');
+      const blockLicense = document.getElementById('blockLicense');
+      const kpiIncomeDesc = document.getElementById('kpiIncomeDesc');
+
+      if (mode === 'active') {
+        btnActive.className = "flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-emerald-500 text-white shadow-xs";
+        btnRetired.className = "flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-500 hover:text-slate-800";
+        blockSalary.classList.remove('opacity-40', 'pointer-events-none');
+        blockLicense.classList.add('opacity-40', 'pointer-events-none');
+        kpiIncomeDesc.innerText = "雙薪 + 房租 + 美股配息";
+      } else {
+        btnRetired.className = "flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-xs";
+        btnActive.className = "flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-500 hover:text-slate-800";
+        blockSalary.classList.add('opacity-40', 'pointer-events-none');
+        blockLicense.classList.remove('opacity-40', 'pointer-events-none');
+        kpiIncomeDesc.innerText = "技師證照 + 房租 + 美股配息";
+      }
+      updateAll();
+    }
+
+    // --- CRCO 連動 ---
+    function handleCrcoSlider(val) {
+      const num = parseFloat(val) || 0;
+      document.getElementById('crcoInput').value = num.toFixed(4).replace(/\.?0+$/, "");
+      updateAll();
+    }
+    function handleCrcoInput(val) {
+      let num = parseFloat(val);
+      if (isNaN(num)) num = 0;
+      if (num < 0) num = 0;
+      if (num > 1.20) num = 1.20;
+      document.getElementById('crcoSlider').value = num;
+      updateAll();
+    }
+    function setCrcoQuick(val) {
+      document.getElementById('crcoSlider').value = val;
+      document.getElementById('crcoInput').value = parseFloat(val);
+      updateAll();
+    }
+
+    // --- AMDY 連動 ---
+    function handleAmdySlider(val) {
+      const num = parseFloat(val) || 0;
+      document.getElementById('amdyInput').value = num.toFixed(2);
+      updateAll();
+    }
+    function handleAmdyInput(val) {
+      let num = parseFloat(val);
+      if (isNaN(num)) num = 0;
+      if (num < 0) num = 0;
+      if (num > 2.50) num = 2.50;
+      document.getElementById('amdySlider').value = num;
+      updateAll();
+    }
+    function setAmdyQuick(val) {
+      document.getElementById('amdySlider').value = val;
+      document.getElementById('amdyInput').value = parseFloat(val).toFixed(2);
+      updateAll();
+    }
+
+    function parseVal(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function updateAll() {
+      const crcoShares = parseVal('crcoShares');
+      const amdyShares = parseVal('amdyShares');
+
+      let crcoWeekly = parseFloat(document.getElementById('crcoInput').value);
+      if (isNaN(crcoWeekly)) crcoWeekly = 0;
+      let amdyWeekly = parseFloat(document.getElementById('amdyInput').value);
+      if (isNaN(amdyWeekly)) amdyWeekly = 0;
+
+      // 週配息與月配息計算
+      const crcoWeeklyInflow = Math.round(crcoShares * crcoWeekly * TAX_RATE * USD_TWD);
+      const crcoMonthly = crcoWeeklyInflow * 4;
+
+      const amdyWeeklyInflow = Math.round(amdyShares * amdyWeekly * TAX_RATE * USD_TWD);
+      const amdyMonthly = amdyWeeklyInflow * 4;
+
+      const totalDiv = crcoMonthly + amdyMonthly;
+
+      // 渲染數值
+      document.getElementById('valCrcoWeekly').innerText = `+$${crcoWeeklyInflow.toLocaleString()} 元`;
+      document.getElementById('valCrcoMonthly').innerText = `+$${crcoMonthly.toLocaleString()} 元`;
+
+      document.getElementById('valAmdyWeekly').innerText = `+$${amdyWeeklyInflow.toLocaleString()} 元`;
+      document.getElementById('valAmdyMonthly').innerText = `+$${amdyMonthly.toLocaleString()} 元`;
+
+      document.getElementById('valTotalDiv').innerText = `+$${totalDiv.toLocaleString()}`;
+
+      // 淨值計算 (CRCO以$25估，AMDY以$50估)
+      const usEquityTwd = (crcoShares * 25 + amdyShares * 50) * USD_TWD;
+      const netWorthWan = ((REAL_ESTATE_NET + usEquityTwd - TOTAL_DEBT) / 10000).toFixed(1);
+      document.getElementById('kpiNetWorth').innerText = `$${netWorthWan} 萬`;
+
+      // 收入計算
+      const salaryHsu = parseVal('inSalaryHsu');
+      const salaryLiao = parseVal('inSalaryLiao');
+      const licenseIncome = parseVal('inLicense');
+      const rentIncome = parseVal('inRent');
+
+      let salaryTotal = 0;
+      let activeLicense = 0;
+
+      if (currentMode === 'active') {
+        salaryTotal = salaryHsu + salaryLiao;
+      } else {
+        activeLicense = licenseIncome;
+      }
+
+      const totalIncome = salaryTotal + activeLicense + rentIncome + totalDiv;
+
+      // 支出計算
+      const edu = parseVal('inEdu');
+      const livingRepair = parseVal('inLivingRepair');
+      const med = parseVal('inMed');
+      const travelSub = parseVal('inTravelSub');
+      const mortgage = parseVal('inMortgage');
+      const loanMgmt = parseVal('inLoanMgmt');
+
+      const totalExpense = edu + livingRepair + med + travelSub + mortgage + loanMgmt;
+      const netSurplus = totalIncome - totalExpense;
+
+      // 更新 KPI 卡片
+      document.getElementById('kpiTotalIncome').innerText = `$${totalIncome.toLocaleString()}`;
+      document.getElementById('kpiTotalExpense').innerText = `-$${totalExpense.toLocaleString()}`;
+
+      const surplusEl = document.getElementById('kpiNetSurplus');
+      if (netSurplus >= 0) {
+        surplusEl.innerText = `+$${netSurplus.toLocaleString()}`;
+        surplusEl.className = "text-2xl sm:text-3xl font-bold font-mono text-amber-500 mt-2";
+        document.getElementById('kpiSurplusSub').innerText = "每月純淨新存款 (現金流充沛)";
+      } else {
+        surplusEl.innerText = `-$${Math.abs(netSurplus).toLocaleString()}`;
+        surplusEl.className = "text-2xl sm:text-3xl font-bold font-mono text-rose-500 mt-2";
+        document.getElementById('kpiSurplusSub').innerText = "現金流差額 (可調度修繕儲備)";
+      }
+
+      // 渲染圖表與右側數據
+      renderChartsAndLists(salaryTotal, activeLicense, rentIncome, crcoMonthly, amdyMonthly, edu, livingRepair, med, travelSub, mortgage, loanMgmt, totalIncome, totalExpense, netSurplus);
+
+      // 自動記憶儲存至本地
+      saveState();
+    }
+
+    function renderChartsAndLists(salary, license, rent, crco, amdy, edu, living, med, travel, mort, loan, totalInc, totalExp, surplus) {
+      // 1. 收入來源環狀圖
+      let incomeItems = [];
+      if (currentMode === 'active') {
+        incomeItems = [
+          { label: '主動雙薪', val: salary, color: '#10b981' },
+          { label: '房產租金', val: rent, color: '#3b82f6' },
+          { label: 'CRCO配息', val: crco, color: '#8b5cf6' },
+          { label: 'AMDY配息', val: amdy, color: '#f59e0b' }
+        ];
+      } else {
+        incomeItems = [
+          { label: '技師證照', val: license, color: '#6366f1' },
+          { label: '房產租金', val: rent, color: '#3b82f6' },
+          { label: 'CRCO配息', val: crco, color: '#8b5cf6' },
+          { label: 'AMDY配息', val: amdy, color: '#f59e0b' }
+        ];
+      }
+
+      let incomeListHtml = '';
+      incomeItems.forEach(item => {
+        const pct = totalInc > 0 ? ((item.val / totalInc) * 100).toFixed(1) : 0;
+        incomeListHtml += `
+          <div class="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 border border-slate-200/60">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${item.color}"></span>
+              <span class="text-slate-600 text-[11px] font-medium truncate">${item.label}</span>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <span class="text-slate-400 text-[10px] mr-1 font-mono">(${pct}%)</span>
+              <span class="text-slate-800 font-semibold text-[11px] font-mono">$${item.val.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('listIncomeDetails').innerHTML = incomeListHtml;
+
+      const incLabels = incomeItems.map(i => i.label);
+      const incData = incomeItems.map(i => i.val);
+      const incColors = incomeItems.map(i => i.color);
+
+      if (chartIncomeInstance) {
+        chartIncomeInstance.data.labels = incLabels;
+        chartIncomeInstance.data.datasets[0].data = incData;
+        chartIncomeInstance.data.datasets[0].backgroundColor = incColors;
+        chartIncomeInstance.update();
+      } else {
+        const ctx1 = document.getElementById('chartIncome').getContext('2d');
+        chartIncomeInstance = new Chart(ctx1, {
+          type: 'doughnut',
+          data: {
+            labels: incLabels,
+            datasets: [{
+              data: incData,
+              backgroundColor: incColors,
+              borderColor: '#ffffff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '72%'
+          }
+        });
+      }
+
+      // 2. 支出結構圓餅圖
+      const expenseItems = [
+        { label: '小孩教育', val: edu, color: '#f43f5e' },
+        { label: '生活修繕', val: living, color: '#fb923c' },
+        { label: '醫療健康', val: med, color: '#eab308' },
+        { label: '旅遊訂閱', val: travel, color: '#06b6d4' },
+        { label: '房貸本息', val: mort, color: '#ec4899' },
+        { label: '理財貸管', val: loan, color: '#64748b' }
+      ];
+
+      let expenseListHtml = '';
+      expenseItems.forEach(item => {
+        const pct = totalExp > 0 ? ((item.val / totalExp) * 100).toFixed(1) : 0;
+        expenseListHtml += `
+          <div class="flex items-center justify-between p-1 rounded-lg bg-slate-50 border border-slate-200/60">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${item.color}"></span>
+              <span class="text-slate-600 text-[11px] font-medium truncate">${item.label}</span>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <span class="text-slate-400 text-[10px] mr-1 font-mono">(${pct}%)</span>
+              <span class="text-slate-800 font-semibold text-[11px] font-mono">$${item.val.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('listExpenseDetails').innerHTML = expenseListHtml;
+
+      const expLabels = expenseItems.map(e => e.label);
+      const expData = expenseItems.map(e => e.val);
+      const expColors = expenseItems.map(e => e.color);
+
+      if (chartExpenseInstance) {
+        chartExpenseInstance.data.labels = expLabels;
+        chartExpenseInstance.data.datasets[0].data = expData;
+        chartExpenseInstance.data.datasets[0].backgroundColor = expColors;
+        chartExpenseInstance.update();
+      } else {
+        const ctx2 = document.getElementById('chartExpense').getContext('2d');
+        chartExpenseInstance = new Chart(ctx2, {
+          type: 'pie',
+          data: {
+            labels: expLabels,
+            datasets: [{
+              data: expData,
+              backgroundColor: expColors,
+              borderColor: '#ffffff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+
+      // 3. 收支對比長條圖
+      const barLabels = ['每月總流入', '每月總流出', '純口袋盈餘'];
+      const barData = [totalInc, totalExp, Math.max(surplus, 0)];
+      const barColors = ['#3b82f6', '#f43f5e', surplus >= 0 ? '#f59e0b' : '#94a3b8'];
+
+      if (chartBalanceInstance) {
+        chartBalanceInstance.data.datasets[0].data = barData;
+        chartBalanceInstance.data.datasets[0].backgroundColor = barColors;
+        chartBalanceInstance.update();
+      } else {
+        const ctx3 = document.getElementById('chartBalance').getContext('2d');
+        chartBalanceInstance = new Chart(ctx3, {
+          type: 'bar',
+          data: {
+            labels: barLabels,
+            datasets: [{
+              data: barData,
+              backgroundColor: barColors,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: '#64748b', font: { size: 11, family: 'Noto Sans TC' } }, grid: { display: false } },
+              y: { ticks: { color: '#94a3b8', font: { size: 10, family: 'JetBrains Mono' } }, grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      }
+    }
+
+    // 初始化流程：先檢查讀取記憶，若無則以預設啟動
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      setMode(currentMode);
+    });
+  </script>
+</body>
+</html>
