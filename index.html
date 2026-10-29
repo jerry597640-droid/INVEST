@@ -114,10 +114,16 @@ html{scroll-padding-top:0}
 .quick-jumps{grid-template-columns:repeat(4,minmax(0,1fr))}
 .ledger-panel{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:22px;background:#f1faf5;border-color:#bde1d2}
 .mascot-control{display:flex;flex-direction:column;align-items:center;gap:2px;width:130px;max-width:100%;padding:0;border:0;background:transparent;color:#52786e;cursor:pointer}
-.mascot-control span{font-size:11px;line-height:1.3;font-weight:800;white-space:nowrap}
-.luffy-friend{display:block;width:100%;max-width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 4px 4px #40514a35);transform-origin:50% 90%;animation:friend-idle 3.8s ease-in-out infinite}
-.luffy-friend.celebrate{animation:friend-celebrate .75s ease-in-out 2}
-@keyframes friend-idle{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+.mascot-control .mascot-tip{font-size:11px;line-height:1.3;font-weight:800;white-space:nowrap}
+.mascot-stage{display:block;position:relative;width:100%;aspect-ratio:2/3;filter:drop-shadow(0 4px 4px #40514a35);transform-origin:50% 90%;animation:friend-idle 1.35s ease-in-out infinite}
+.mascot-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.luffy-friend{clip-path:polygon(0 0,100% 0,100% 66%,0 66%)}
+.luffy-leg-left{clip-path:polygon(0 62%,50% 62%,50% 100%,0 100%);transform-origin:42% 63%;animation:walk-left 1.35s ease-in-out infinite}
+.luffy-leg-right{clip-path:polygon(50% 62%,100% 62%,100% 100%,50% 100%);transform-origin:58% 63%;animation:walk-right 1.35s ease-in-out infinite}
+.mascot-stage.celebrate{animation:friend-celebrate .75s ease-in-out 2}
+@keyframes friend-idle{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-2px) rotate(0)}50%{transform:translateY(0) rotate(1deg)}75%{transform:translateY(-2px) rotate(0)}}
+@keyframes walk-left{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(-2px)}}
+@keyframes walk-right{0%,100%{transform:rotate(5deg) translateY(-2px)}50%{transform:rotate(-5deg)}}
 @keyframes friend-celebrate{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-9px) rotate(-7deg)}65%{transform:translateY(-5px) rotate(7deg)}}
 .ledger-copy h3{margin:0 0 6px;color:#304662;font-size:18px}
 .ledger-copy p{margin:5px 0;color:#526e69;font-size:13px;line-height:1.65}
@@ -170,7 +176,7 @@ html{scroll-padding-top:0}
   .top-actions .button{padding:7px 8px;font-size:11px}
   .ledger-panel{grid-template-columns:78px 1fr}.mascot-control{width:76px}.ledger-toolbar{grid-template-columns:1fr}.ledger-toolbar .button{grid-column:auto}
 }
-@media(prefers-reduced-motion:reduce){.luffy-friend,.luffy-friend.celebrate{animation:none}}
+@media(prefers-reduced-motion:reduce){.mascot-stage,.mascot-stage.celebrate,.luffy-leg-left,.luffy-leg-right{animation:none}}
 
 html[data-theme="dark"]{color-scheme:dark;--ink:#edf5f2;--muted:#bed0ce;--line:#4c6568;--bg:#192b32;--paper:#253941;--teal:#92d6ca;--deep:#b2d8ef;--red:#ff9da6}
 html[data-theme="dark"] body{background-color:#192b32;background-image:radial-gradient(#34504b 1px,transparent 1px)}
@@ -212,6 +218,22 @@ html[data-theme="dark"] .notice:not(:empty){background:#58373a;border-color:#ad7
 html[data-theme="dark"] .mobile-nav{background:#263c43;border-color:#6a8888;box-shadow:0 5px 0 #14272c,0 10px 28px #0007}
 html[data-theme="dark"] .mobile-nav a{color:#d1dfdc}html[data-theme="dark"] .mobile-nav a[aria-current="location"]{background:#4a6973;color:#fff}
 
+
+.sync-panel{margin-top:15px}
+.sync-panel summary{flex-wrap:wrap}
+.sync-badge{font-size:11px;font-weight:800;border-radius:99px;background:#e8f2ec;color:#466f5f;padding:3px 8px;white-space:nowrap}
+.sync-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.sync-fields input{width:100%;min-width:0;min-height:46px;padding:9px 11px;border:2px solid #cfddeb;border-radius:12px;background:#f8fbff;color:var(--ink);font:inherit;font-size:16px}
+.sync-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.sync-preview{margin-top:12px;padding:12px 14px;border:1.5px solid #bcdccc;border-radius:13px;background:#f1faf5;color:#345e4e;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.sync-help{font-size:12px!important}
+.input-wrap input[readonly]{color:#557b70;cursor:default}
+html[data-theme="dark"] .sync-badge{background:#3f6657;color:#e4f8ed}
+html[data-theme="dark"] .sync-fields input{background:#1c3038;border-color:#648184;color:#f0f8f6}
+html[data-theme="dark"] .sync-preview{background:#2b5044;border-color:#6a9b88;color:#e2f7e9}
+html[data-theme="dark"] .input-wrap input[readonly]{color:#c7e9d9}
+@media(max-width:690px){.sync-fields{grid-template-columns:1fr}.sync-actions .button{min-height:44px}.sync-panel summary{gap:7px}}
+
 </style>
 </head>
 <body>
@@ -239,19 +261,34 @@ html[data-theme="dark"] .mobile-nav a{color:#d1dfdc}html[data-theme="dark"] .mob
 <section id="ledger" class="scroll-top" aria-labelledby="ledgerTitle">
   <div class="section-head"><div><p class="eyebrow">INVESTMENT RECORDS</p><h2 id="ledgerTitle">投資交易整合</h2><p>把每日交易與家庭財務試算放在同一個入口。</p></div><span class="tag">私人帳本</span></div>
   <article class="panel ledger-panel">
-    <button type="button" id="mascotAction" class="mascot-control" aria-label="讓路飛開心動一動"><img id="ledgerLuffy" class="luffy-friend" src="assets/luffy-3d.webp" width="400" height="600" alt=""><span aria-hidden="true">點我動一動</span></button>
-    <div class="ledger-copy"><h3>配息投資 War Room</h3><p>每日買賣與配息登錄、交易紀錄、投資損益，以及 CRCO／AMDY 行情走勢，都可在原有私人戰情室查看。</p><p class="ledger-boundary">兩邊資料目前不會自動同步；私人戰情室仍需要原有帳號權限。</p></div>
+    <button type="button" id="mascotAction" class="mascot-control" aria-label="讓路飛開心動一動"><span class="mascot-stage" id="mascotStage" aria-hidden="true"><img class="luffy-leg-left" src="assets/luffy-3d.webp" width="400" height="600" alt=""><img class="luffy-leg-right" src="assets/luffy-3d.webp" width="400" height="600" alt=""><img id="ledgerLuffy" class="luffy-friend" src="assets/luffy-3d.webp" width="400" height="600" alt=""></span><span class="mascot-tip" aria-hidden="true">點我動一動</span></button>
+    <div class="ledger-copy"><h3>配息投資 War Room</h3><p>每日買賣與配息登錄、交易紀錄、投資損益，以及 CRCO／AMDY 行情走勢，都可在原有私人戰情室查看。</p><p class="ledger-boundary">可在下方設定股數與交易紀錄的唯讀同步；私人戰情室仍需要原有帳號權限。</p></div>
     <a class="button primary ledger-open" href="https://dividend-war-room.hsujerry.chatgpt.site" target="_blank" rel="noopener noreferrer">開啟私人投資戰情室 ↗</a>
   </article>
-  <details class="panel ledger-import">
-    <summary>📂 匯入原表 CSV，查看交易紀錄</summary>
+  <details class="panel ledger-import sync-panel" id="syncPanel">
+    <summary>🔄 Google 試算表自動同步 <span class="sync-badge" id="syncBadge">尚未連線</span></summary>
     <div class="ledger-body">
-      <p>請先從 Google Sheets 的「每日填寫表單」下載 CSV，再選擇檔案。紀錄只在目前頁面暫時查看，不會上傳、寫回試算表或自動帶入家庭試算；重新整理後需重新匯入。</p>
+      <p>登入並啟用後，網頁開啟且授權有效時，每分鐘讀取一次已送出交易與持股彙總，將股數帶入家庭試算。股數不一致或連線失敗時，保留現有數字並提示。</p>
+      <p>此功能只讀取，不會寫入試算表，也不會改動配息假設或家庭收支。Google 授權範圍為此帳號<strong>所有試算表的唯讀權限</strong>；可隨時在 Google 帳戶設定撤銷。</p>
+      <div class="sync-fields">
+        <div class="field"><label for="syncClientId">Google OAuth 網頁用戶端 ID</label><input id="syncClientId" type="text" autocomplete="off" spellcheck="false" placeholder="….apps.googleusercontent.com"></div>
+        <div class="field"><label for="syncSheetId">投資試算表網址或 ID</label><input id="syncSheetId" type="text" autocomplete="off" spellcheck="false" placeholder="貼上 Google 試算表網址"></div>
+      </div>
+      <p class="sync-help">首次使用需先建立 Google OAuth 網頁用戶端，並啟用 Google Sheets API。設定只存於此瀏覽器；授權權杖不會保存。</p>
+      <div class="sync-actions"><button type="button" class="button" id="syncPrepare">準備 Google 登入</button><button type="button" class="button primary" id="syncAuthorize" hidden>Google 登入並讀取</button><button type="button" class="button primary" id="syncApply" hidden>確認啟用自動帶入</button><button type="button" class="button" id="syncRefresh" hidden>立即更新</button><button type="button" class="button" id="syncStop" hidden>暫停同步</button><button type="button" class="button" id="syncUndo" hidden>還原同步前股數</button></div>
+      <div id="syncStatus" class="ledger-status" role="status" aria-live="polite">尚未連接 Google 試算表。</div>
+      <div id="syncPreview" class="sync-preview" hidden></div>
+    </div>
+  </details>
+  <details class="panel ledger-import">
+    <summary>📂 查看交易紀錄（同步／CSV）</summary>
+    <div class="ledger-body">
+      <p>連線同步後可在此查看 Google 試算表紀錄；也可以從「每日填寫表單」下載 CSV 後選擇檔案。紀錄只在目前頁面暫時查看，不會上傳或寫回試算表；重新整理後需重新讀取。</p>
       <p>依原表 A～J 欄顯示；F 欄沿用原表每股費用慣例，H 欄是整筆實領配息。此處不重新計算投資損益。</p>
       <div class="ledger-file-actions"><label for="ledgerCsvFile" class="button primary">選擇 CSV 檔案</label><input id="ledgerCsvFile" class="sr-only" type="file" accept=".csv,text/csv"><span class="tiny">UTF-8 編碼，最多 2 MB</span></div>
       <div id="ledgerStatus" class="ledger-status" role="status" aria-live="polite">尚未匯入交易紀錄。</div>
       <div id="ledgerViewer" hidden>
-        <div class="ledger-toolbar"><div><label for="ledgerSearch">搜尋代碼或備註</label><input id="ledgerSearch" type="search" placeholder="例如 CRCO"></div><div><label for="ledgerType">交易類型</label><select id="ledgerType"><option value="all">全部類型</option><option value="buy">買入</option><option value="sell">賣出</option><option value="dividend">配息</option><option value="other">其他</option></select></div><button type="button" class="button" id="ledgerClear">清除這次匯入</button></div>
+        <div class="ledger-toolbar"><div><label for="ledgerSearch">搜尋代碼或備註</label><input id="ledgerSearch" type="search" placeholder="例如 CRCO"></div><div><label for="ledgerType">交易類型</label><select id="ledgerType"><option value="all">全部類型</option><option value="buy">買入</option><option value="sell">賣出</option><option value="dividend">配息</option><option value="other">其他</option></select></div><button type="button" class="button" id="ledgerClear">清除目前顯示</button></div>
         <div id="ledgerCount" class="ledger-count" role="status"></div>
         <div id="ledgerRows" class="ledger-rows"></div>
         <div class="ledger-pagination"><button type="button" class="button small" id="ledgerPrev">上一頁</button><span id="ledgerPage"></span><button type="button" class="button small" id="ledgerNext">下一頁</button></div>
@@ -267,6 +304,7 @@ html[data-theme="dark"] .mobile-nav a{color:#d1dfdc}html[data-theme="dark"] .mob
 </section>
 <section id="stress" class="scroll-top" aria-labelledby="stressTitle"><div class="section-head"><div><p class="eyebrow">RETIREMENT SCENARIO LAB</p><h2 id="stressTitle">退休現金流推演</h2><p>模擬配息、租金及房貸變化，觀察對退休後的影響。</p></div><span class="tag">獨立情境</span></div><article class="panel stress-panel"><div class="stress-intro"><div><h3>如果未來情況改變？</h3><p>基準採用目前退休情境；調整以下假設不會改動原本的收支與持股。</p></div><button type="button" class="button small" id="stressReset">回到基準假設</button></div><div class="stress-grid"><div class="field"><label for="stressDividendDrop">稅後配息減少</label><div class="input-wrap"><input type="number" inputmode="decimal" id="stressDividendDrop" min="0" max="100" step="any" value="0"><span class="unit">%</span></div><div class="stress-hint">0–100%；0% 表示配息不變</div></div><div class="field"><label for="stressRentDrop">租金收入減少</label><div class="input-wrap"><input type="number" inputmode="decimal" id="stressRentDrop" min="0" max="100" step="any" value="0"><span class="unit">%</span></div><div class="stress-hint">0–100%；可模擬空租或租金變動</div></div><div class="field"><label for="stressExpensePct">房貸以外支出比例</label><div class="input-wrap"><input type="number" inputmode="decimal" id="stressExpensePct" min="0" max="500" step="any" value="100"><span class="unit">%</span></div><div class="stress-hint">0–500%；100% 表示支出不變</div></div><div class="field"><label for="stressMortgage">退休後全部房貸本息／月</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="stressMortgage" min="0" step="any" value="" placeholder="留空沿用現況"></div><div class="stress-hint">留空沿用現況；填入所有房貸合計，0 表示無房貸</div></div></div><p id="stressValidation" class="notice" role="status"></p><div class="stress-compare"><div class="stress-result"><span>退休基準・每月結餘</span><strong id="stressBaseSurplus">—</strong><small>目前租金、配息與支出</small></div><div class="stress-result stress-highlight"><span>推演情境・每月結餘</span><strong id="stressSurplus">—</strong><small id="stressDelta">—</small></div><div class="stress-detail"><div><span>推演月收入</span><strong id="stressIncome">—</strong></div><div><span>推演月支出</span><strong id="stressExpense">—</strong></div><div><span>租金＋配息支出涵蓋率</span><strong id="stressCoverage">—</strong></div><div><span>一年預估結餘</span><strong id="stressAnnual">—</strong></div></div></div><p class="inline-note">推演收入＝證照收益＋調整後租金＋調整後稅後配息；推演支出＝房貸以外支出×設定比例＋退休後全部房貸。年度金額以相同月結餘乘以 12，未考慮未來股價、通膨、其他稅費或逐年變動，並非收益保證。</p></article></section>
 <section id="dividend" class="scroll-top"><div class="section-head"><div><p class="eyebrow">DIVIDEND PLANNER</p><h2>投資配息試算</h2><p>可用每股配息或整筆稅前配息輸入。</p></div><span class="tag">每月以 4 週計</span></div>
+<p id="syncFieldNotice" class="notice" hidden>股數由 Google 試算表同步。要手動修改，請先在投資交易區暫停同步。</p>
 <div class="two-col">
 <article class="panel holding" data-asset="crco"><div class="panel-title"><div class="asset-head"><span class="asset-icon">C</span><div><h3>CRCO</h3><p>週配息情境試算</p></div></div><span class="asset-amount">稅後估算</span></div><div class="field"><label for="crcoShares">持有股數</label><div class="input-wrap"><input type="number" inputmode="decimal" id="crcoShares" value="9533" min="0" step="any"><span class="unit">股</span></div></div><div class="seg-label"><span>配息輸入方式</span><div class="segments" role="group" aria-label="CRCO 配息輸入方式"><button type="button" data-dividend-mode="share" aria-pressed="true">每股</button><button type="button" data-dividend-mode="total" aria-pressed="false">整筆總額</button></div></div><div class="field" data-kind="share"><label for="crcoInput">每股稅前配息／週</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="crcoInput" value="0.3165" min="0" step="any"><span class="unit">／股</span></div><input type="range" id="crcoSlider" class="range-control" min="0" max="1.2" step="0.0001" value="0.3165" aria-label="CRCO 每股稅前配息滑桿"><div class="quick" aria-label="CRCO 配息快速輸入"><button type="button" data-preset="0">$0</button><button type="button" data-preset="0.2">$0.20</button><button type="button" data-preset="0.3">$0.30</button><button type="button" data-preset="0.6">$0.60</button><button type="button" data-preset="1.2">$1.20</button></div></div><div class="field" data-kind="total" hidden><label for="crcoTotal">整筆稅前配息總額／週</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="crcoTotal" value="0" min="0" step="any"><span class="unit">／週</span></div><p class="form-note">填入這一筆持股的稅前美元總額，不再乘以股數。</p></div><div class="hold-result"><div><span>每週預估稅後</span><strong id="valCrcoWeekly">—</strong></div><div><span>每月預估稅後</span><strong id="valCrcoMonthly">—</strong></div></div></article>
 <article class="panel holding" data-asset="amdy"><div class="panel-title"><div class="asset-head"><span class="asset-icon amdy">A</span><div><h3>AMDY</h3><p>週配息情境試算</p></div></div><span class="asset-amount">稅後估算</span></div><div class="field"><label for="amdyShares">持有股數</label><div class="input-wrap"><input type="number" inputmode="decimal" id="amdyShares" value="61" min="0" step="any"><span class="unit">股</span></div></div><div class="seg-label"><span>配息輸入方式</span><div class="segments" role="group" aria-label="AMDY 配息輸入方式"><button type="button" data-dividend-mode="share" aria-pressed="true">每股</button><button type="button" data-dividend-mode="total" aria-pressed="false">整筆總額</button></div></div><div class="field" data-kind="share"><label for="amdyInput">每股稅前配息／週</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="amdyInput" value="0.36" min="0" step="any"><span class="unit">／股</span></div><input type="range" id="amdySlider" class="range-control" min="0" max="2.5" step="0.0001" value="0.36" aria-label="AMDY 每股稅前配息滑桿"><div class="quick" aria-label="AMDY 配息快速輸入"><button type="button" data-preset="0">$0</button><button type="button" data-preset="0.46">$0.46</button><button type="button" data-preset="0.69">$0.69</button><button type="button" data-preset="1.2">$1.20</button><button type="button" data-preset="2.5">$2.50</button></div></div><div class="field" data-kind="total" hidden><label for="amdyTotal">整筆稅前配息總額／週</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="amdyTotal" value="0" min="0" step="any"><span class="unit">／週</span></div><p class="form-note">填入這一筆持股的稅前美元總額，不再乘以股數。</p></div><div class="hold-result"><div><span>每週預估稅後</span><strong id="valAmdyWeekly">—</strong></div><div><span>每月預估稅後</span><strong id="valAmdyMonthly">—</strong></div></div></article>
@@ -274,7 +312,7 @@ html[data-theme="dark"] .mobile-nav a{color:#d1dfdc}html[data-theme="dark"] .mob
 </section>
 <section id="cashflow" class="scroll-top"><div class="section-head"><div><p class="eyebrow">MONTHLY CASH FLOW</p><h2>每月收支設定</h2><p>修改後自動重新計算並儲存。</p></div><span class="tag">單位：新臺幣／月</span></div><div class="two-col"><article class="panel"><div class="panel-title"><div><h3>每月收入</h3><p>在職計入雙薪；退休計入證照收益。</p></div></div><div class="form-grid"><div class="field" id="blockSalaryHsu"><label for="inSalaryHsu">本人薪資・在職</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inSalaryHsu" value="72816" min="0" step="any"></div></div><div class="field" id="blockSalaryLiao"><label for="inSalaryLiao">配偶薪資・在職</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inSalaryLiao" value="75774" min="0" step="any"></div></div><div class="field" id="blockLicense"><label for="inLicense">證照收益・退休</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inLicense" value="40000" min="0" step="any"></div></div><div class="field"><label for="inRent">房地產總租金</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inRent" value="110143" min="0" step="any"></div></div></div><p class="form-note">非目前情境的收入仍可預先編輯，但不計入目前情境。</p></article><article class="panel"><div class="panel-title"><div><h3>每月支出</h3><p>依實際狀況調整各項預算。</p></div></div><div class="form-grid"><div class="field"><label for="inEdu">小孩教育費用</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inEdu" value="75000" min="0" step="any"></div></div><div class="field"><label for="inLivingRepair">生活與修繕準備</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inLivingRepair" value="75000" min="0" step="any"></div></div><div class="field"><label for="inMed">醫療健康儲備</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inMed" value="20000" min="0" step="any"></div></div><div class="field"><label for="inTravelSub">旅遊基金與訂閱</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inTravelSub" value="7500" min="0" step="any"></div></div><div class="field"><label for="inMortgage">房貸本息</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inMortgage" value="79099" min="0" step="any"></div></div><div class="field"><label for="inLoanMgmt">理財貸息與管理費</label><div class="input-wrap"><span class="unit">NT$</span><input type="number" inputmode="decimal" id="inLoanMgmt" value="31225" min="0" step="any"></div></div></div></article></div></section>
 <section id="settings" class="scroll-top"><div class="section-head"><div><p class="eyebrow">ASSUMPTIONS</p><h2>估值與匯率設定</h2><p>估值是情境試算，請自行維護所使用的價格。</p></div></div><article class="panel"><div class="settings-grid"><div class="field"><label for="inRealEstateNetWan">房產淨值</label><div class="input-wrap"><input type="number" inputmode="decimal" id="inRealEstateNetWan" value="3747.4" min="0" step="any"><span class="unit">萬元</span></div></div><div class="field"><label for="inTotalDebtWan">其他融資負債</label><div class="input-wrap"><input type="number" inputmode="decimal" id="inTotalDebtWan" value="1019.7" min="0" step="any"><span class="unit">萬元</span></div></div><div class="field"><label for="taxPercent">配息預扣比例</label><div class="input-wrap"><input type="number" inputmode="decimal" id="taxPercent" value="30" min="0" max="100" step="any"><span class="unit">%</span></div></div><div class="field"><label for="crcoPrice">CRCO 估值股價</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="crcoPrice" value="25" min="0" step="any"><span class="unit">／股</span></div></div><div class="field"><label for="amdyPrice">AMDY 估值股價</label><div class="input-wrap"><span class="unit">US$</span><input type="number" inputmode="decimal" id="amdyPrice" value="50" min="0" step="any"><span class="unit">／股</span></div></div><div><div class="rate-row"><div class="field"><label for="inUsdTwd">美元兌新臺幣</label><div class="input-wrap"><input type="number" inputmode="decimal" id="inUsdTwd" value="32.00" min="0.0001" step="any"><span class="unit">TWD</span></div></div><button type="button" class="button small" id="refreshRate">更新</button></div><label class="checkline"><input type="checkbox" id="autoRate" checked>開啟網頁時自動更新匯率</label><div class="tiny" id="rateStatus" role="status">使用目前匯率</div></div></div><p class="inline-note">資產估計淨值 ＝ 房產淨值 ＋ 美股股數 × 手動估值股價 × 匯率 － 其他融資負債。房產淨值如已扣除某筆房貸，請勿在其他融資負債重複扣除；此數字未含其他未輸入的資產及負債。股價不是即時行情。匯率由 ExchangeRate API 提供參考，可能非即時成交價。</p><p id="validationNotice" class="notice" role="status"></p></article></section>
-<section id="data" class="scroll-top"><div class="section-head"><div><p class="eyebrow">YOUR DATA</p><h2>資料管理</h2><p>資料記在目前的瀏覽器，可用備份移轉。</p></div></div><article class="panel"><div class="data-actions"><button type="button" class="button primary" id="exportBackup">匯出備份</button><button type="button" class="button" id="importBackup">匯入備份</button><input type="file" id="backupFile" accept="application/json,.json" class="sr-only"><button type="button" class="button" id="exportCsv">匯出試算 CSV</button><button type="button" class="button" id="resetDefaults">恢復原始預設</button></div><div id="dataStatus" class="notice" role="status"></div><details class="disclosure"><summary>使用方式與計算說明</summary><p>① 先在上方切換在職或退休情境。② 填入持股與每週配息，並編輯收入、支出與估值假設。③ 查看收支比較與配息目標。④ 換手機或瀏覽器前先匯出備份，再於新裝置匯入。</p><p>資料儲存在瀏覽器本機，不會自動跨裝置同步；清除瀏覽器資料可能移除紀錄。匯率更新時，瀏覽器會向匯率服務請求美元匯率；此請求不包含您的收支或持股資料。配息與資產數字皆為輸入條件下的估算，無法代表未來保證收益。</p></details></article></section>
+<section id="data" class="scroll-top"><div class="section-head"><div><p class="eyebrow">YOUR DATA</p><h2>資料管理</h2><p>資料記在目前的瀏覽器，可用備份移轉。</p></div></div><article class="panel"><div class="data-actions"><button type="button" class="button primary" id="exportBackup">匯出備份</button><button type="button" class="button" id="importBackup">匯入備份</button><input type="file" id="backupFile" accept="application/json,.json" class="sr-only"><button type="button" class="button" id="exportCsv">匯出試算 CSV</button><button type="button" class="button" id="resetDefaults">恢復原始預設</button></div><div id="dataStatus" class="notice" role="status"></div><details class="disclosure"><summary>使用方式與計算說明</summary><p>① 先在上方切換在職或退休情境。② 填入持股與每週配息，並編輯收入、支出與估值假設。③ 查看收支比較與配息目標。④ 換手機或瀏覽器前先匯出備份，再於新裝置匯入。</p><p>家庭試算資料儲存在瀏覽器本機；開啟 Google 同步後，只有持股數與交易紀錄會從投資試算表讀取，其他資料不會跨裝置同步。清除瀏覽器資料可能移除紀錄。匯率更新時，瀏覽器會向匯率服務請求美元匯率；此請求不包含您的收支或持股資料。配息與資產數字皆為輸入條件下的估算，無法代表未來保證收益。</p></details></article></section>
 </main><footer class="footer">FAMILY FINANCE DASHBOARD · 用清楚的數字，規劃每一步</footer>
 </div>
 <script>
@@ -372,7 +410,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   ];
   const PAGE_SIZE = 10;
   const MAX_BYTES = 2 * 1024 * 1024;
-  let rows = [], page = 1, readVersion = 0;
+  let rows = [], page = 1, readVersion = 0, rowsSource = 'none';
 
   function normalizeHeader(value) {
     return String(value || '').replace(/^\uFEFF/, '').normalize('NFKC').replace(/\s/g, '').toLowerCase();
@@ -422,7 +460,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
 
   function celebrate() {
-    const friend = $id('ledgerLuffy');
+    const friend = $id('mascotStage');
     friend.classList.remove('celebrate');
     void friend.offsetWidth;
     friend.classList.add('celebrate');
@@ -441,7 +479,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       (!search || (item.cells[1] + ' ' + item.cells[8]).toLowerCase().includes(search)));
     const pages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
     page = Math.max(1, Math.min(page, pages));
-    $id('ledgerCount').textContent = '匯入 ' + rows.length + ' 筆；符合條件 ' + matched.length + ' 筆（依原表順序）';
+    $id('ledgerCount').textContent = '顯示 ' + rows.length + ' 筆；符合條件 ' + matched.length + ' 筆（依原表順序）';
     $id('ledgerPage').textContent = '第 ' + page + '／' + pages + ' 頁';
     $id('ledgerPrev').disabled = page <= 1;
     $id('ledgerNext').disabled = page >= pages;
@@ -456,7 +494,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       const head = element('div', 'ledger-row-head');
       const identity = element('div');
       identity.append(element('div', 'ledger-symbol', c[1] || '代碼未填'));
-      identity.append(element('div', 'ledger-date', (c[0] || '日期未填') + ' · 匯入第 ' + item.rowNumber + ' 筆'));
+      identity.append(element('div', 'ledger-date', (c[0] || '日期未填') + ' · 紀錄第 ' + item.rowNumber + ' 筆'));
       head.append(identity, element('span', 'ledger-type ' + item.type.key, item.type.label));
       const values = element('div', 'ledger-values');
       values.append(valueCell('股數 D', c[3]), valueCell('成交價 E', c[4]), valueCell('費用 F（每股）', c[5]),
@@ -469,7 +507,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   function clearLedger(message) {
     readVersion++;
-    rows = []; page = 1;
+    rows = []; page = 1; rowsSource = 'none';
     $id('ledgerViewer').hidden = true;
     $id('ledgerRows').replaceChildren();
     $id('ledgerCsvFile').value = '';
@@ -496,7 +534,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         const cells = Array.from({length:10}, (_,i) => String(r[i] || '').trim());
         return {cells, rowNumber:index+1, type:typeInfo(cells[2])};
       });
-      rows = items; page = 1;
+      rows = items; page = 1; rowsSource = 'csv';
       $id('ledgerSearch').value = ''; $id('ledgerType').value = 'all';
       $id('ledgerViewer').hidden = false;
       $id('ledgerStatus').textContent = '已載入 ' + rows.length + ' 筆；只在此頁暫時查看。';
@@ -504,7 +542,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       celebrate();
     } catch (error) {
       if (version !== readVersion) return;
-      rows = []; $id('ledgerViewer').hidden = true; $id('ledgerRows').replaceChildren();
+      rows = []; rowsSource = 'none'; $id('ledgerViewer').hidden = true; $id('ledgerRows').replaceChildren();
       $id('ledgerStatus').classList.add('error');
       $id('ledgerStatus').textContent = '匯入失敗：' + (error && error.message ? error.message : '無法讀取檔案。');
     } finally {
@@ -535,18 +573,335 @@ window.addEventListener('DOMContentLoaded',()=>{
     badge.textContent = message;
   }
 
+  /* Read-only Google Sheets synchronization. Tokens stay in memory. */
+  const SYNC_CONFIG_KEY = 'family_warroom_google_sync_v1';
+  const SYNC_UNDO_KEY = 'family_warroom_sync_previous_v1';
+  const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+  let syncConfig = {clientId:'', sheetId:'', enabled:false};
+  let accessToken = '', tokenExpiresAt = 0, syncTimer = null, syncInFlight = false, syncQueued = false;
+  let syncSnapshot = null, syncGeneration = 0;
+
+  function setSyncStatus(message, badge, error) {
+    $id('syncStatus').textContent = message;
+    $id('syncStatus').classList.toggle('error', !!error);
+    $id('syncBadge').textContent = badge;
+  }
+
+  function saveSyncConfig() {
+    try { localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig)); return true; }
+    catch (_) { return false; }
+  }
+
+  function sheetIdFrom(value) {
+    const text = String(value || '').trim();
+    if (/^[A-Za-z0-9_-]{20,200}$/.test(text)) return text;
+    try {
+      const url = new URL(text);
+      const match = url.hostname === 'docs.google.com' && url.pathname.match(/^\/spreadsheets\/d\/([A-Za-z0-9_-]{20,200})(?:\/|$)/);
+      return match ? match[1] : '';
+    } catch (_) { return ''; }
+  }
+
+  function setSyncedFields(locked) {
+    $id('crcoShares').readOnly = locked;
+    $id('amdyShares').readOnly = locked;
+    $id('syncClientId').readOnly = locked;
+    $id('syncSheetId').readOnly = locked;
+    $id('syncFieldNotice').hidden = !locked;
+  }
+
+  function hasUndo() {
+    try {
+      const v = JSON.parse(localStorage.getItem(SYNC_UNDO_KEY) || 'null');
+      return !!v && typeof v.crcoShares === 'string' && typeof v.amdyShares === 'string';
+    } catch (_) { return false; }
+  }
+
+  function updateSyncButtons() {
+    const tokenReady = !!accessToken && tokenExpiresAt > Date.now();
+    $id('syncApply').hidden = !tokenReady || !syncSnapshot || syncConfig.enabled;
+    $id('syncRefresh').hidden = !tokenReady;
+    $id('syncStop').hidden = !syncConfig.enabled && !tokenReady;
+    $id('syncUndo').hidden = !hasUndo();
+  }
+
+  function loadGoogleIdentity() {
+    if (window.google && google.accounts && google.accounts.oauth2) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      let settled = false;
+      const timer = setTimeout(() => finish(false), 15000);
+      function finish(ok) {
+        if (settled) return;
+        settled = true; clearTimeout(timer);
+        if (ok && window.google && google.accounts && google.accounts.oauth2) resolve();
+        else { script.remove(); reject(new Error('無法載入 Google 登入服務，請檢查網路後重試。')); }
+      }
+      script.async = true; script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => finish(true); script.onerror = () => finish(false);
+      document.head.append(script);
+    });
+  }
+
+  async function prepareSync() {
+    const clientId = $id('syncClientId').value.trim();
+    const sheetId = sheetIdFrom($id('syncSheetId').value);
+    if (!/^[A-Za-z0-9_-]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/.test(clientId)) {
+      setSyncStatus('請填入有效的 Google OAuth 網頁用戶端 ID。', '設定未完成', true); return;
+    }
+    if (!sheetId) { setSyncStatus('請填入有效的 Google 試算表網址或 ID。', '設定未完成', true); return; }
+    if (syncConfig.enabled && (clientId !== syncConfig.clientId || sheetId !== syncConfig.sheetId)) {
+      setSyncStatus('請先暫停同步，再更換 Google 用戶端或試算表。', '設定未變更', true); return;
+    }
+    if (clientId !== syncConfig.clientId || sheetId !== syncConfig.sheetId) {
+      syncGeneration++; clearInterval(syncTimer); accessToken = ''; tokenExpiresAt = 0; syncSnapshot = null;
+      $id('syncPreview').hidden = true; updateSyncButtons();
+    }
+    syncConfig.clientId = clientId; syncConfig.sheetId = sheetId;
+    if (!saveSyncConfig()) { setSyncStatus('無法儲存連線設定，請檢查瀏覽器儲存權限。', '設定未完成', true); return; }
+    const generation = syncGeneration;
+    $id('syncPrepare').disabled = true;
+    setSyncStatus('正在準備 Google 登入…', '準備中', false);
+    try {
+      await loadGoogleIdentity();
+      if (generation !== syncGeneration) return;
+      $id('syncAuthorize').hidden = false;
+      setSyncStatus('請點「Google 登入並讀取」，以試算表擁有人帳號授權。', '等待登入', false);
+    } catch (error) { if (generation === syncGeneration) setSyncStatus(error.message, '連線失敗', true); }
+    finally { $id('syncPrepare').disabled = false; }
+  }
+
+  function authorizeSync() {
+    if (!(window.google && google.accounts && google.accounts.oauth2) || !syncConfig.clientId || !syncConfig.sheetId) {
+      setSyncStatus('請先完成設定並按「準備 Google 登入」。', '設定未完成', true); return;
+    }
+    const generation = syncGeneration;
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id:syncConfig.clientId, scope:SHEETS_SCOPE,
+        callback: response => {
+          if (generation !== syncGeneration) return;
+          if (!response || response.error || !response.access_token ||
+              (typeof google.accounts.oauth2.hasGrantedAllScopes === 'function' && !google.accounts.oauth2.hasGrantedAllScopes(response, SHEETS_SCOPE))) {
+            setSyncStatus('Google 未授予試算表唯讀權限，請重新登入並確認授權。', '未授權', true); return;
+          }
+          accessToken = response.access_token;
+          const seconds = Number(response.expires_in);
+          tokenExpiresAt = Date.now() + (Number.isFinite(seconds) && seconds > 0 ? seconds : 3600) * 1000;
+          $id('syncAuthorize').hidden = true;
+          refreshSync();
+        },
+        error_callback: () => { if (generation === syncGeneration) setSyncStatus('Google 登入未完成，請檢查彈出視窗或重新登入。', '未授權', true); }
+      });
+      client.requestAccessToken({prompt:''});
+    } catch (_) { setSyncStatus('無法開啟 Google 登入，請檢查用戶端設定或瀏覽器。', '連線失敗', true); }
+  }
+
+  function syncNumber(value, optional) {
+    if (value === '' || value === null || value === undefined) return optional ? 0 : null;
+    if (typeof value !== 'number' && typeof value !== 'string') return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function validateSheetData(data) {
+    if (!data || !Array.isArray(data.valueRanges) || data.valueRanges.length !== 2) throw new Error('Google 回傳的試算表格式不完整。');
+    const ledger = data.valueRanges[0].values || [], summary = data.valueRanges[1].values || [];
+    if (!ledger.length || !EXPECTED.every((aliases, i) => aliases.includes(normalizeHeader((ledger[0] || [])[i]))))
+      throw new Error('找不到符合 A～J 欄位的「每日填寫表單」。');
+    if (normalizeHeader((summary[0] || [])[0]) !== '股票代碼' || normalizeHeader((summary[0] || [])[1]) !== '總股數')
+      throw new Error('找不到符合欄位的「持股成本彙總」。');
+    if (ledger.length > 10001) throw new Error('交易紀錄超過 10,000 筆，請先整理帳本。');
+    const quantities = {}, totals = {CRCO:0, AMDY:0};
+    for (const r of summary.slice(1)) {
+      const symbol = String(r[0] || '').trim().toUpperCase();
+      if (!Object.prototype.hasOwnProperty.call(totals, symbol)) continue;
+      if (Object.prototype.hasOwnProperty.call(quantities, symbol)) throw new Error(symbol + ' 在持股彙總中出現多次，請先核對。');
+      const n = syncNumber(r[1], false);
+      if (n === null || n < 0) throw new Error(symbol + ' 的彙總股數無效，請先核對。');
+      quantities[symbol] = n;
+    }
+    if (!Object.prototype.hasOwnProperty.call(quantities, 'CRCO') || !Object.prototype.hasOwnProperty.call(quantities, 'AMDY'))
+      throw new Error('持股彙總缺少 CRCO 或 AMDY；未更新家庭試算。');
+    for (const row of ledger.slice(1)) {
+      const symbol = String(row[1] || '').trim().toUpperCase(), type = String(row[2] || '').trim().toLowerCase();
+      if (!Object.prototype.hasOwnProperty.call(totals, symbol) || String(row[9] || '').trim().toUpperCase() !== 'YES') continue;
+      if (type === 'dividend' || type === '配息') continue;
+      if (!['buy','sell','買入','賣出'].includes(type)) throw new Error(symbol + ' 有無法辨識的交易類型，請先核對。');
+      const count = syncNumber(row[3], false), price = syncNumber(row[4], false), fee = syncNumber(row[5], true);
+      if (count === null || count <= 0 || price === null || price <= 0 || fee === null || fee < 0)
+        throw new Error(symbol + ' 有無效的買賣資料，請先核對。');
+      totals[symbol] += (type === 'buy' || type === '買入' ? count : -count);
+    }
+    for (const symbol of ['CRCO','AMDY']) {
+      if (!Number.isFinite(totals[symbol]) || totals[symbol] < -0.000001 || Math.abs(totals[symbol] - quantities[symbol]) > 0.000001)
+        throw new Error(symbol + ' 的已送出交易加總與持股彙總不一致；未更新家庭試算。');
+    }
+    return {quantities, records:ledger.slice(1).filter(r => r.some(v => v !== '' && v !== null && v !== undefined))};
+  }
+
+  function displaySheetDate(value) {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 3000000) {
+      const d = new Date(Math.round((value - 25569) * 86400000));
+      if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
+    return value === null || value === undefined ? '' : String(value).trim();
+  }
+
+  function showSheetRecords(records, timestamp) {
+    if (rowsSource === 'csv') return false;
+    const first = rowsSource !== 'google';
+    rows = records.map((r, i) => {
+      const cells = Array.from({length:10}, (_, n) => n === 0 ? displaySheetDate(r[n]) : String(r[n] ?? '').trim());
+      return {cells, rowNumber:i+1, type:typeInfo(cells[2])};
+    });
+    rowsSource = 'google';
+    if (first) { page = 1; $id('ledgerSearch').value = ''; $id('ledgerType').value = 'all'; }
+    $id('ledgerViewer').hidden = false;
+    $id('ledgerClear').textContent = '清除目前顯示';
+    $id('ledgerStatus').classList.remove('error');
+    $id('ledgerStatus').textContent = 'Google 試算表已讀取 ' + rows.length + ' 筆（' + timestamp + '）；僅在此頁暫時查看。';
+    renderLedger();
+    return true;
+  }
+
+  function applySheetQuantities(snapshot) {
+    $id('crcoShares').value = String(snapshot.quantities.CRCO);
+    $id('amdyShares').value = String(snapshot.quantities.AMDY);
+    update(); saveState();
+  }
+
+  function startSyncTimer() {
+    clearInterval(syncTimer);
+    syncTimer = setInterval(() => { if (syncConfig.enabled && document.visibilityState === 'visible') refreshSync(); }, 60000);
+  }
+
+  async function refreshSync() {
+    if (syncInFlight) { syncQueued = true; return; }
+    if (!accessToken || tokenExpiresAt <= Date.now() + 1000) {
+      accessToken = ''; syncSnapshot = null; clearInterval(syncTimer); $id('syncAuthorize').hidden = false;
+      setSyncStatus('Google 授權已到期，保留上次數字；請重新登入。', '需重新登入', true); updateSyncButtons(); return;
+    }
+    const generation = syncGeneration;
+    syncInFlight = true; $id('syncRefresh').disabled = true;
+    setSyncStatus('正在讀取 Google 試算表…', '更新中', false);
+    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
+    try {
+      const query = new URLSearchParams();
+      query.append('ranges', "'每日填寫表單'!A1:J10002");
+      query.append('ranges', "'持股成本彙總'!A1:E101");
+      query.set('valueRenderOption', 'UNFORMATTED_VALUE');
+      const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent(syncConfig.sheetId) + '/values:batchGet?' + query.toString();
+      const response = await fetch(url, {headers:{Authorization:'Bearer ' + accessToken}, cache:'no-store', signal:controller.signal});
+      if (generation !== syncGeneration) return;
+      if (!response.ok) {
+        if (response.status === 401) { accessToken = ''; clearInterval(syncTimer); $id('syncAuthorize').hidden = false; throw new Error('Google 授權已到期，請重新登入。'); }
+        if (response.status === 403) throw new Error('帳號沒有讀取權限，或 Google Sheets API 尚未啟用。');
+        if (response.status === 404) throw new Error('找不到試算表，請檢查網址。');
+        throw new Error('Google 試算表讀取失敗（HTTP ' + response.status + '）。');
+      }
+      const result = validateSheetData(await response.json());
+      if (generation !== syncGeneration) return;
+      syncSnapshot = result;
+      const timestamp = new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      const recordsShown = showSheetRecords(result.records, timestamp);
+      const q = result.quantities;
+      $id('syncPreview').textContent = '帳本股數：CRCO ' + q.CRCO.toLocaleString('zh-TW') + ' 股；AMDY ' + q.AMDY.toLocaleString('zh-TW') + ' 股。家庭試算目前：CRCO ' + $id('crcoShares').value + ' 股；AMDY ' + $id('amdyShares').value + ' 股。';
+      $id('syncPreview').hidden = false;
+      if (syncConfig.enabled) {
+        applySheetQuantities(result); setSyncedFields(true); startSyncTimer();
+        $id('syncPreview').textContent = '已帶入帳本股數：CRCO ' + q.CRCO.toLocaleString('zh-TW') + ' 股；AMDY ' + q.AMDY.toLocaleString('zh-TW') + ' 股。';
+        setSyncStatus('已更新股數' + (recordsShown ? '與交易紀錄' : '；交易清單仍顯示手動匯入的 CSV') + '：' + timestamp + '（臺灣時間）。網頁開啟時每分鐘檢查。', '同步中', false);
+      } else setSyncStatus('已讀取並核對帳本，請確認股數後啟用自動帶入。', '等待確認', false);
+      updateSyncButtons();
+    } catch (error) {
+      if (generation !== syncGeneration) return;
+      syncSnapshot = null; $id('syncPreview').hidden = true;
+      setSyncStatus((error.name === 'AbortError' ? '讀取逾時' : (error.message || '連線失敗')).replace(/。$/, '') + '；保留現有數字。', '未更新', true);
+      updateSyncButtons();
+    } finally {
+      clearTimeout(timeout); syncInFlight = false; $id('syncRefresh').disabled = false;
+      if (syncQueued) { syncQueued = false; if (accessToken && tokenExpiresAt > Date.now()) queueMicrotask(refreshSync); }
+    }
+  }
+
+  function activateSync() {
+    if (!syncSnapshot || !accessToken || tokenExpiresAt <= Date.now()) { setSyncStatus('請先重新登入並讀取試算表。', '需重新登入', true); return; }
+    try {
+      localStorage.setItem(SYNC_UNDO_KEY, JSON.stringify({crcoShares:$id('crcoShares').value, amdyShares:$id('amdyShares').value}));
+      syncConfig.enabled = true;
+      if (!saveSyncConfig()) throw new Error('storage');
+    } catch (_) { syncConfig.enabled = false; setSyncStatus('無法保存同步前的股數，請先檢查瀏覽器儲存權限。', '未啟用', true); return; }
+    applySheetQuantities(syncSnapshot); setSyncedFields(true); startSyncTimer();
+    const q = syncSnapshot.quantities;
+    $id('syncPreview').textContent = '已帶入帳本股數：CRCO ' + q.CRCO.toLocaleString('zh-TW') + ' 股；AMDY ' + q.AMDY.toLocaleString('zh-TW') + ' 股。';
+    setSyncStatus('自動同步已啟用；網頁開啟且授權有效時每分鐘檢查。', '同步中', false);
+    updateSyncButtons();
+  }
+
+  function stopSync() {
+    syncGeneration++; clearInterval(syncTimer); accessToken = ''; tokenExpiresAt = 0; syncSnapshot = null; syncQueued = false;
+    syncConfig.enabled = false; saveSyncConfig(); setSyncedFields(false);
+    $id('syncPreview').hidden = true; $id('syncAuthorize').hidden = !(window.google && google.accounts && google.accounts.oauth2);
+    if (rowsSource === 'google') clearLedger('已清除本頁的同步紀錄；試算表不受影響。');
+    setSyncStatus('已暫停同步並保留目前股數。Google 帳號權限可於帳戶設定撤銷。', '已暫停', false);
+    updateSyncButtons();
+  }
+
+  function undoSync() {
+    let previous = null; try { previous = JSON.parse(localStorage.getItem(SYNC_UNDO_KEY) || 'null'); } catch (_) {}
+    if (!previous || typeof previous.crcoShares !== 'string' || typeof previous.amdyShares !== 'string') return;
+    stopSync();
+    $id('crcoShares').value = previous.crcoShares; $id('amdyShares').value = previous.amdyShares;
+    update(); saveState();
+    try { localStorage.removeItem(SYNC_UNDO_KEY); } catch (_) {}
+    setSyncStatus('已還原啟用同步前的股數。', '已還原', false); updateSyncButtons();
+  }
+
+  function initSync() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY) || 'null');
+      if (saved && typeof saved.clientId === 'string' && typeof saved.sheetId === 'string')
+        syncConfig = {clientId:saved.clientId, sheetId:saved.sheetId, enabled:saved.enabled === true};
+    } catch (_) {}
+    $id('syncClientId').value = syncConfig.clientId; $id('syncSheetId').value = syncConfig.sheetId;
+    setSyncedFields(syncConfig.enabled);
+    if (syncConfig.enabled) setSyncStatus('保留上次同步的股數；請重新連接 Google 才能更新。', '等待重新連線', false);
+    $id('syncPrepare').addEventListener('click', prepareSync);
+    $id('syncAuthorize').addEventListener('click', authorizeSync);
+    $id('syncRefresh').addEventListener('click', refreshSync);
+    $id('syncApply').addEventListener('click', activateSync);
+    $id('syncStop').addEventListener('click', stopSync);
+    $id('syncUndo').addEventListener('click', undoSync);
+    for (const field of ['syncClientId', 'syncSheetId']) $id(field).addEventListener('input', () => {
+      if (syncConfig.enabled) return;
+      syncGeneration++; clearInterval(syncTimer); accessToken = ''; tokenExpiresAt = 0; syncSnapshot = null; syncQueued = false;
+      $id('syncAuthorize').hidden = true; $id('syncPreview').hidden = true; updateSyncButtons();
+      setSyncStatus('設定已變更，請重新準備 Google 登入。', '設定未完成', false);
+    });
+    window.addEventListener('storage', event => {
+      if (event.key === STORAGE_KEY && syncConfig.enabled) {
+        clearTimeout(saveTimer); saveTimer = null; stopSync();
+        setSyncStatus('另一個分頁已變更資料，同步已暫停；請重新整理後確認資料再連線。', '同步暫停', true);
+      }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && syncConfig.enabled && accessToken) refreshSync(); });
+    updateSyncButtons();
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     let theme = 'light'; try { theme = localStorage.getItem(THEME_KEY) || 'light'; } catch (_) {}
     setTheme(theme, false);
     $id('themeToggle').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true));
     $id('mascotAction').addEventListener('click', celebrate);
-    $id('ledgerLuffy').addEventListener('animationend', event => { if (event.animationName === 'friend-celebrate') event.currentTarget.classList.remove('celebrate'); });
+    $id('mascotStage').addEventListener('animationend', event => { if (event.target === event.currentTarget && event.animationName === 'friend-celebrate') event.currentTarget.classList.remove('celebrate'); });
     $id('ledgerCsvFile').addEventListener('change', importLedger);
     $id('ledgerSearch').addEventListener('input', () => { page = 1; renderLedger(); });
     $id('ledgerType').addEventListener('change', () => { page = 1; renderLedger(); });
     $id('ledgerPrev').addEventListener('click', () => { page--; renderLedger(); });
     $id('ledgerNext').addEventListener('click', () => { page++; renderLedger(); });
-    $id('ledgerClear').addEventListener('click', () => clearLedger('已清除本次匯入；原始試算表不受影響。'));
+    $id('ledgerClear').addEventListener('click', () => clearLedger('已清除目前顯示的紀錄；原始試算表不受影響。'));
+    initSync();
     renderGoalBadge();
     new MutationObserver(renderGoalBadge).observe($id('goalProgress'), {childList:true, characterData:true, subtree:true});
   });
